@@ -1,755 +1,344 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const BRAND = "Quiz Unicornio";
+const GREEN = "#00C389";
+const GREEN_DARK = "#00A873";
+const GREEN_LIGHT = "#E6FAF5";
 
-const questions = [
-  {
-    id: 1,
-    question: "¿Cuál es tu objetivo principal en este momento?",
-    options: [
-      { id: "a", text: "Perder peso y mejorar mi figura", emoji: "⚖️" },
-      { id: "b", text: "Ganar músculo y fuerza", emoji: "💪" },
-      { id: "c", text: "Mejorar mi salud general", emoji: "❤️" },
-      { id: "d", text: "Aumentar mi energía y vitalidad", emoji: "⚡" },
-    ],
-  },
-  {
-    id: 2,
-    question: "¿Cuál es tu nivel de actividad física actual?",
-    options: [
-      { id: "a", text: "Sedentario (poco o nada de ejercicio)", emoji: "🛋️" },
-      { id: "b", text: "Ligero (1-2 días por semana)", emoji: "🚶" },
-      { id: "c", text: "Moderado (3-4 días por semana)", emoji: "🏃" },
-      { id: "d", text: "Activo (5+ días por semana)", emoji: "🏋️" },
-    ],
-  },
-  {
-    id: 3,
-    question: "¿Cómo describirías tus hábitos alimenticios?",
-    options: [
-      { id: "a", text: "Como mucha comida procesada", emoji: "🍔" },
-      { id: "b", text: "Intento comer sano pero me cuesta", emoji: "🥗" },
-      { id: "c", text: "Tengo una dieta bastante equilibrada", emoji: "🍎" },
-      { id: "d", text: "Sigo un plan nutricional estricto", emoji: "📋" },
-    ],
-  },
-  {
-    id: 4,
-    question: "¿Cuántas horas duermes en promedio por noche?",
-    options: [
-      { id: "a", text: "Menos de 5 horas", emoji: "😴" },
-      { id: "b", text: "Entre 5 y 6 horas", emoji: "🌙" },
-      { id: "c", text: "Entre 7 y 8 horas", emoji: "✨" },
-      { id: "d", text: "Más de 8 horas", emoji: "💤" },
-    ],
-  },
-  {
-    id: 5,
-    question: "¿Qué tan estresado/a te sientes en tu día a día?",
-    options: [
-      { id: "a", text: "Muy estresado/a constantemente", emoji: "😰" },
-      { id: "b", text: "Estresado/a con frecuencia", emoji: "😟" },
-      { id: "c", text: "A veces me estreso", emoji: "😐" },
-      { id: "d", text: "Casi nunca me estreso", emoji: "😊" },
-    ],
-  },
-  {
-    id: 6,
-    question: "¿Cuánta agua bebes al día?",
-    options: [
-      { id: "a", text: "Menos de 1 litro", emoji: "🥤" },
-      { id: "b", text: "Entre 1 y 1.5 litros", emoji: "💧" },
-      { id: "c", text: "Entre 1.5 y 2 litros", emoji: "🌊" },
-      { id: "d", text: "Más de 2 litros", emoji: "🏊" },
-    ],
-  },
+const EMOTION_IMGS = [
+  { label: "Strongly disagree", url: "https://d8j0ntlcm91z4.cloudfront.net/user_3BmIZZOeo8Ij7LJDXZiU1DK3MY3/hf_20260606_003640_e38b2dd5-5902-4844-89d6-56e0a7303dfb.png" },
+  { label: "Disagree",          url: "https://d8j0ntlcm91z4.cloudfront.net/user_3BmIZZOeo8Ij7LJDXZiU1DK3MY3/hf_20260606_003641_5019111b-a4ec-42b0-a3fc-7017a99a7b92.png" },
+  { label: "Neutral",           url: "https://d8j0ntlcm91z4.cloudfront.net/user_3BmIZZOeo8Ij7LJDXZiU1DK3MY3/hf_20260606_003642_7f8d69fe-306b-4a8c-9c94-bea3c0a0c72b.png" },
+  { label: "Agree",             url: "https://d8j0ntlcm91z4.cloudfront.net/user_3BmIZZOeo8Ij7LJDXZiU1DK3MY3/hf_20260606_003644_e873362e-ee20-4261-85a5-f3191b0f4a77.png" },
+  { label: "Strongly agree",    url: "https://d8j0ntlcm91z4.cloudfront.net/user_3BmIZZOeo8Ij7LJDXZiU1DK3MY3/hf_20260606_003645_8a8944a9-7df1-4712-8c18-4d915ca72249.png" },
 ];
 
-const results = {
-  beginner: {
-    title: "¡Eres un Unicornio en Desarrollo! 🦄",
-    subtitle: "Tu viaje hacia el bienestar está comenzando",
-    description:
-      "Tienes mucho potencial por descubrir. Con pequeños cambios en tu rutina diaria, puedes transformar completamente tu bienestar. ¡El primer paso ya lo has dado!",
-    color: "#a78bfa",
-    gradient: "linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)",
-    tips: [
-      "Empieza con caminatas de 20 minutos al día",
-      "Añade una porción de verduras a cada comida",
-      "Establece una hora fija para dormir",
-    ],
-  },
-  intermediate: {
-    title: "¡Eres un Unicornio en Crecimiento! 🌟",
-    subtitle: "Vas por el buen camino",
-    description:
-      "Tienes buenas bases pero aún hay espacio para mejorar. Con consistencia y las estrategias adecuadas, puedes llevar tu bienestar al siguiente nivel.",
-    color: "#8b5cf6",
-    gradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
-    tips: [
-      "Incrementa la intensidad de tus entrenamientos gradualmente",
-      "Planifica tus comidas con anticipación",
-      "Incorpora técnicas de manejo del estrés",
-    ],
-  },
-  advanced: {
-    title: "¡Eres un Unicornio Legendario! 🏆",
-    subtitle: "Tu estilo de vida es inspirador",
-    description:
-      "Tienes hábitos excelentes y una mentalidad ganadora. Estás en la élite del bienestar. Sigue refinando tu rutina para alcanzar la perfección.",
-    color: "#6d28d9",
-    gradient: "linear-gradient(135deg, #6d28d9 0%, #0ea5e9 100%)",
-    tips: [
-      "Optimiza tu recuperación con técnicas avanzadas",
-      "Considera trabajar con un especialista en nutrición",
-      "Explora modalidades de entrenamiento nuevas",
-    ],
-  },
-};
+const SCREENS = [
+  { id: "gender",      type: "gender" },
+  { id: "age",         type: "age",  question: "What's your age?", sub: "We only use your age to personalize your plan", options: ["18–24","25–34","35–44","45–54","55–64","65+"] },
+  { id: "disclaimer",  type: "info", title: "We're glad you are here", body: "This journey is intended to help you better understand your patterns and structure your experiences.\n\nWe recommend treating this quiz as a moment of honest reflection.\n\nThis app is not intended to replace professional diagnosis, treatment, or therapy. Everyone's experience is unique, and results may vary.", btn: "Continue" },
+  // Q1-Q6: single
+  { id:"q1",  type:"single", n:1,  q:"How often do you feel tired or lack energy, even after rest?",                             opts:["Often","Sometimes","Rarely"] },
+  { id:"q2",  type:"single", n:2,  q:"Do you often leave things to the last minute?",                                              opts:["Often","Sometimes","Never"] },
+  { id:"q3",  type:"single", n:3,  q:"How easily distracted are you?",                                                             opts:["Easily distracted","Occasionally lose focus","Rarely lose focus","Very focused"] },
+  { id:"q4",  type:"single", n:4,  q:"How often do you feel worried or overwhelmed?",                                             opts:["Often","Sometimes","Rarely"] },
+  { id:"q5",  type:"single", n:5,  q:"How often do you experience mood swings?",                                                  opts:["Often","Sometimes","Rarely"] },
+  { id:"q6",  type:"single", n:6,  q:"Have you felt in harmony with yourself and your circle in recent months?",                  opts:["Yes","Moderately","No"] },
+  // Q7-Q10: icon scale
+  { id:"q7",  type:"scale",  n:7,  q:"It's difficult for me to express emotions",               sub:"Do you agree with the following statement?" },
+  { id:"q8",  type:"scale",  n:8,  q:"I often feel overwhelmed by the amount of tasks I have to do", sub:"Do you agree with the following statement?" },
+  { id:"q9",  type:"scale",  n:9,  q:"I often find it challenging to make a decision",           sub:"Do you agree with the following statement?" },
+  { id:"q10", type:"scale",  n:10, q:"I often struggle to pursue my ambitions due to fear of messing up and failing", sub:"Do you agree with the following statement?" },
+  // Q11-Q15: single
+  { id:"q11", type:"single", n:11, q:"Have you ever struggled with accepting compliments because you didn't believe they are true?", opts:["Almost always","Depends","Not at all","I'm not sure"] },
+  { id:"q12", type:"single", n:12, q:"I tend to feel insecure while talking to others",                                           opts:["Yes","No","I'm not sure"] },
+  { id:"q13", type:"single", n:13, q:"I tend to overthink my partner's behavior",                                                 opts:["Yes","No","I'm not sure"] },
+  { id:"q14", type:"single", n:14, q:"Do you often prioritize others' needs and sacrifice your own ones?",                        opts:["Often","Sometimes","Never"] },
+  { id:"q15", type:"single", n:15, q:"When was the last time you felt driven and motivated?",                                     opts:["A few weeks ago","Less than a year ago","More than a year ago","Never in my life"] },
+  // Q16-Q23: multi-select
+  { id:"q16", type:"multi",  n:16, q:"Are there aspects of your well-being you'd like to address?",                              opts:["Low energy","Worry","Emotional exhaustion","Overthinking","Irritability","I'm totally fine"] },
+  { id:"q17", type:"single", n:17, q:"What do you usually do first thing in the morning?",                                        opts:["Picking up my phone","Making coffee","Brushing teeth & Taking Shower","Other"] },
+  { id:"q18", type:"single", n:18, q:"How much time do you dedicate to physical activity each week?",                             opts:["0–2 hours","3–5 hours","6–8 hours","More than 8 hours"] },
+  { id:"q19", type:"multi",  n:19, q:"Do you have any habits that you'd like to quit?",                                           opts:["Being late / running out of time","Self-doubt","Social media","Sugar cravings or junk food","Losing sleep","Nail-biting","Binge-watching"] },
+  { id:"q20", type:"multi",  n:20, q:"Is there anything you want to improve about your sleep?",                                   opts:["Waking up tired","Waking up during the night","Reduced sleep quality","Difficulty falling asleep","Waking up earlier than intended","I sleep well"] },
+  { id:"q21", type:"multi",  n:21, q:"Have any of the following caused you to struggle more than before?",                        opts:["Family or relationship","External circumstances","My appearance","Sleep issues","Job-related stress","Other"] },
+  { id:"q22", type:"multi",  n:22, q:"In order to live a happier life, what do you think you need to improve?",                  opts:["My state of calm","My focus levels","My willpower","My energy levels","My inner strength","Other"] },
+  { id:"q23", type:"multi",  n:23, q:"Which of the following would you like to start working on with your plan?",                opts:["Stop doubting myself","Build emotional resilience","Set and achieve goals","Stop overthinking","Improve my ability to trust others","Improve my daily routine"] },
+  // Interstitial
+  { id:"trust1", type:"info", icon:"🧠", title:"Developed using evidence-based practices", body:"Our approach is rooted in behavioral science and cognitive techniques designed to support lasting well-being.", btn:"Continue" },
+  // Q24-Q25
+  { id:"q24", type:"single", n:24, q:"How much do you know about Behavioral Techniques?",       opts:["Nothing at all","Not that much","A lot"] },
+  { id:"q25", type:"single", n:25, q:"Did you hear about us from a specialist?",                 opts:["Yes","No"] },
+  // Expert trust screen
+  { id:"trust2", type:"trust", quotes:[
+    { text:"Highly effective, research-backed tools that actually create change.", author:"Dr. M. Ramos, Clinical Psychologist" },
+    { text:"Finally an app that takes mental well-being seriously.", author:"Ana K., Wellness Coach" },
+  ], btn:"Continue" },
+  // Q26
+  { id:"q26", type:"single", n:26, q:"Set your daily goal",                                      opts:["5 min / day","10 min / day","15 min / day","20 min / day"] },
+  // End
+  { id:"email",   type:"email" },
+  { id:"loading", type:"loading" },
+  { id:"result",  type:"result" },
+];
 
-function calculateResult(answers) {
-  // TODO: Replace with actual scoring logic connected to backend API
-  const scores = { a: 1, b: 2, c: 3, d: 4 };
-  const total = Object.values(answers).reduce(
-    (sum, val) => sum + (scores[val] || 1),
-    0
-  );
-  const avg = total / Object.keys(answers).length;
-  if (avg < 2) return results.beginner;
-  if (avg < 3) return results.intermediate;
-  return results.advanced;
-}
+const TOTAL_Q = 26;
 
 export default function App() {
-  const [step, setStep] = useState("welcome"); // welcome | quiz | result
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [animating, setAnimating] = useState(false);
-  const [result, setResult] = useState(null);
+  const [gender, setGender] = useState(null);
   const [email, setEmail] = useState("");
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
-  const [emailError, setEmailError] = useState("");
+  const [emailErr, setEmailErr] = useState("");
+  const [loadPct, setLoadPct] = useState(0);
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const screen = SCREENS[idx];
 
-  const handleStart = () => {
-    setStep("quiz");
-    setCurrentQuestion(0);
-    setAnswers({});
-    setSelectedOption(null);
+  const next = () => setIdx(i => Math.min(i + 1, SCREENS.length - 1));
+  const back = () => setIdx(i => Math.max(i - 1, 0));
+
+  const answer = (key, val) => {
+    setAnswers(a => ({ ...a, [key]: val }));
+    setTimeout(next, 320);
   };
 
-  const handleOptionSelect = (optionId) => {
-    setSelectedOption(optionId);
-    setTimeout(() => {
-      const newAnswers = { ...answers, [currentQuestion]: optionId };
-      setAnswers(newAnswers);
-
-      if (currentQuestion < questions.length - 1) {
-        setAnimating(true);
-        setTimeout(() => {
-          setCurrentQuestion((prev) => prev + 1);
-          setSelectedOption(null);
-          setAnimating(false);
-        }, 300);
-      } else {
-        setAnimating(true);
-        setTimeout(() => {
-          const r = calculateResult(newAnswers);
-          setResult(r);
-          setStep("result");
-          setAnimating(false);
-        }, 300);
-      }
-    }, 400);
+  const toggleMulti = (key, val) => {
+    setAnswers(a => {
+      const cur = a[key] || [];
+      return { ...a, [key]: cur.includes(val) ? cur.filter(v => v !== val) : [...cur, val] };
+    });
   };
 
-  const handleRestart = () => {
-    setStep("welcome");
-    setCurrentQuestion(0);
-    setAnswers({});
-    setSelectedOption(null);
-    setResult(null);
-    setEmail("");
-    setEmailSubmitted(false);
-    setEmailError("");
-  };
+  useEffect(() => {
+    if (screen.type !== "loading") return;
+    setLoadPct(0);
+    const interval = setInterval(() => {
+      setLoadPct(p => {
+        if (p >= 100) { clearInterval(interval); setTimeout(next, 400); return 100; }
+        return p + 2;
+      });
+    }, 60);
+    return () => clearInterval(interval);
+  }, [screen.type]);
 
-  const validateEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-
-  const handleEmailSubmit = (e) => {
-    e.preventDefault();
-    if (!validateEmail(email)) {
-      setEmailError("Por favor ingresa un correo válido.");
-      return;
-    }
-    setEmailError("");
-    // TODO: Connect to email marketing API (e.g., Mailchimp, HubSpot)
-    setEmailSubmitted(true);
-  };
-
-  const styles = {
-    app: {
-      minHeight: "100vh",
-      background: "linear-gradient(160deg, #f5f0ff 0%, #fce4f6 50%, #e0f2fe 100%)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
-      padding: "16px",
-    },
-    card: {
-      background: "#ffffff",
-      borderRadius: "24px",
-      boxShadow: "0 20px 60px rgba(139,92,246,0.15), 0 4px 20px rgba(0,0,0,0.08)",
-      maxWidth: "620px",
-      width: "100%",
-      overflow: "hidden",
-    },
-    header: {
-      background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%)",
-      padding: "24px 32px 20px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    logo: {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-    },
-    logoEmoji: {
-      fontSize: "28px",
-      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
-    },
-    logoText: {
-      color: "#ffffff",
-      fontWeight: "800",
-      fontSize: "20px",
-      letterSpacing: "-0.3px",
-    },
-    stepLabel: {
-      color: "rgba(255,255,255,0.85)",
-      fontSize: "13px",
-      fontWeight: "600",
-      background: "rgba(255,255,255,0.2)",
-      padding: "4px 12px",
-      borderRadius: "20px",
-    },
-    progressBar: {
-      height: "4px",
-      background: "rgba(255,255,255,0.3)",
-      position: "relative",
-      overflow: "hidden",
-    },
-    progressFill: {
-      height: "100%",
-      background: "#ffffff",
-      borderRadius: "4px",
-      transition: "width 0.5s ease",
-    },
-    body: {
-      padding: "36px 32px 40px",
-    },
-    welcomeEmoji: {
-      fontSize: "72px",
-      textAlign: "center",
-      display: "block",
-      marginBottom: "16px",
-      filter: "drop-shadow(0 4px 8px rgba(139,92,246,0.3))",
-    },
-    welcomeTitle: {
-      fontSize: "28px",
-      fontWeight: "800",
-      color: "#1e1b4b",
-      textAlign: "center",
-      margin: "0 0 12px 0",
-      lineHeight: "1.2",
-    },
-    welcomeSubtitle: {
-      fontSize: "16px",
-      color: "#64748b",
-      textAlign: "center",
-      margin: "0 0 32px 0",
-      lineHeight: "1.6",
-    },
-    featureList: {
-      listStyle: "none",
-      padding: "0",
-      margin: "0 0 36px 0",
-      display: "flex",
-      flexDirection: "column",
-      gap: "12px",
-    },
-    featureItem: {
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-      padding: "14px 16px",
-      background: "#faf5ff",
-      borderRadius: "12px",
-      border: "1px solid #e9d5ff",
-    },
-    featureItemEmoji: {
-      fontSize: "22px",
-      flexShrink: 0,
-    },
-    featureItemText: {
-      fontSize: "14px",
-      color: "#4c1d95",
-      fontWeight: "500",
-    },
-    btn: {
-      width: "100%",
-      padding: "16px 24px",
-      background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "14px",
-      fontSize: "17px",
-      fontWeight: "700",
-      cursor: "pointer",
-      transition: "transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease",
-      boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
-      letterSpacing: "0.3px",
-    },
-    questionTitle: {
-      fontSize: "20px",
-      fontWeight: "700",
-      color: "#1e1b4b",
-      margin: "0 0 28px 0",
-      lineHeight: "1.4",
-    },
-    optionsGrid: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "12px",
-      opacity: animating ? 0 : 1,
-      transform: animating ? "translateX(30px)" : "translateX(0)",
-      transition: "opacity 0.3s ease, transform 0.3s ease",
-    },
-    option: (isSelected) => ({
-      display: "flex",
-      alignItems: "center",
-      gap: "16px",
-      padding: "16px 20px",
-      border: isSelected ? "2px solid #7c3aed" : "2px solid #e5e7eb",
-      borderRadius: "14px",
-      background: isSelected
-        ? "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)"
-        : "#fafafa",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
-      boxShadow: isSelected
-        ? "0 4px 16px rgba(124,58,237,0.2)"
-        : "0 1px 4px rgba(0,0,0,0.05)",
-      transform: isSelected ? "scale(1.02)" : "scale(1)",
-    }),
-    optionEmoji: {
-      fontSize: "26px",
-      flexShrink: 0,
-    },
-    optionText: (isSelected) => ({
-      fontSize: "15px",
-      fontWeight: isSelected ? "600" : "500",
-      color: isSelected ? "#5b21b6" : "#374151",
-      flex: 1,
-    }),
-    optionCheck: {
-      width: "22px",
-      height: "22px",
-      borderRadius: "50%",
-      background: "#7c3aed",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexShrink: 0,
-    },
-    resultEmoji: {
-      fontSize: "64px",
-      textAlign: "center",
-      display: "block",
-      marginBottom: "12px",
-    },
-    resultBadge: (gradient) => ({
-      background: gradient,
-      borderRadius: "20px",
-      padding: "24px",
-      textAlign: "center",
-      marginBottom: "28px",
-    }),
-    resultTitle: {
-      color: "#ffffff",
-      fontSize: "22px",
-      fontWeight: "800",
-      margin: "0 0 6px 0",
-      textShadow: "0 1px 3px rgba(0,0,0,0.2)",
-    },
-    resultSubtitle: {
-      color: "rgba(255,255,255,0.9)",
-      fontSize: "14px",
-      fontWeight: "500",
-      margin: "0",
-    },
-    resultDescription: {
-      fontSize: "15px",
-      color: "#4b5563",
-      lineHeight: "1.7",
-      margin: "0 0 28px 0",
-      padding: "0 4px",
-    },
-    tipsTitle: {
-      fontSize: "16px",
-      fontWeight: "700",
-      color: "#1e1b4b",
-      margin: "0 0 16px 0",
-    },
-    tipsList: {
-      listStyle: "none",
-      padding: "0",
-      margin: "0 0 32px 0",
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-    },
-    tipItem: {
-      display: "flex",
-      alignItems: "flex-start",
-      gap: "10px",
-      fontSize: "14px",
-      color: "#374151",
-      lineHeight: "1.5",
-    },
-    tipDot: {
-      width: "8px",
-      height: "8px",
-      borderRadius: "50%",
-      background: "linear-gradient(135deg, #7c3aed, #ec4899)",
-      flexShrink: 0,
-      marginTop: "6px",
-    },
-    emailSection: {
-      background: "#faf5ff",
-      border: "1px solid #e9d5ff",
-      borderRadius: "16px",
-      padding: "24px",
-      marginBottom: "24px",
-    },
-    emailTitle: {
-      fontSize: "16px",
-      fontWeight: "700",
-      color: "#1e1b4b",
-      margin: "0 0 8px 0",
-    },
-    emailDesc: {
-      fontSize: "13px",
-      color: "#6b7280",
-      margin: "0 0 16px 0",
-      lineHeight: "1.5",
-    },
-    emailForm: {
-      display: "flex",
-      gap: "10px",
-      flexWrap: "wrap",
-    },
-    emailInput: {
-      flex: "1",
-      minWidth: "180px",
-      padding: "12px 16px",
-      border: "2px solid #d8b4fe",
-      borderRadius: "10px",
-      fontSize: "14px",
-      color: "#1e1b4b",
-      outline: "none",
-      background: "#ffffff",
-      transition: "border-color 0.2s ease",
-    },
-    emailBtn: {
-      padding: "12px 20px",
-      background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "10px",
-      fontSize: "14px",
-      fontWeight: "700",
-      cursor: "pointer",
-      transition: "opacity 0.2s ease, transform 0.2s ease",
-      whiteSpace: "nowrap",
-    },
-    emailError: {
-      fontSize: "13px",
-      color: "#dc2626",
-      marginTop: "8px",
-    },
-    successMsg: {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      fontSize: "14px",
-      color: "#059669",
-      fontWeight: "600",
-    },
-    restartBtn: {
-      width: "100%",
-      padding: "14px 24px",
-      background: "transparent",
-      color: "#7c3aed",
-      border: "2px solid #7c3aed",
-      borderRadius: "14px",
-      fontSize: "15px",
-      fontWeight: "700",
-      cursor: "pointer",
-      transition: "background 0.2s ease, color 0.2s ease",
-    },
-    footer: {
-      textAlign: "center",
-      marginTop: "24px",
-      color: "#9ca3af",
-      fontSize: "12px",
-    },
-  };
+  const progress = screen.n ? Math.round((screen.n / TOTAL_Q) * 100) : null;
+  const showBack = idx > 0 && screen.type !== "loading" && screen.type !== "result";
 
   return (
-    <div style={styles.app}>
-      <div style={styles.card}>
-        {/* HEADER */}
-        <div style={styles.header}>
-          <div style={styles.logo}>
-            <span style={styles.logoEmoji}>🦄</span>
-            <span style={styles.logoText}>{BRAND}</span>
-          </div>
-          {step === "quiz" && (
-            <span style={styles.stepLabel}>
-              {currentQuestion + 1} / {questions.length}
-            </span>
-          )}
-        </div>
+    <div style={{ minHeight: "100vh", background: "#F9FAFB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", fontFamily: "system-ui, -apple-system, sans-serif", padding: "0 0 40px" }}>
 
-        {/* PROGRESS BAR */}
-        {step === "quiz" && (
-          <div style={styles.progressBar}>
-            <div style={{ ...styles.progressFill, width: `${progress}%` }} />
+      {/* NAV */}
+      {screen.type !== "result" && screen.type !== "loading" && (
+        <div style={{ width: "100%", maxWidth: 480, padding: "14px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {showBack ? (
+            <button onClick={back} style={{ background: "none", border: "none", cursor: "pointer", padding: "6px 10px 6px 0", fontSize: 20, color: "#374151" }}>←</button>
+          ) : <div style={{ width: 36 }} />}
+          <span style={{ fontWeight: 700, fontSize: 15, color: "#111827", letterSpacing: "-0.3px" }}>Liven</span>
+          <div style={{ width: 36 }} />
+        </div>
+      )}
+
+      {/* PROGRESS BAR */}
+      {progress !== null && (
+        <div style={{ width: "100%", maxWidth: 480, padding: "12px 20px 0" }}>
+          <div style={{ height: 4, background: "#E5E7EB", borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${progress}%`, background: GREEN, borderRadius: 4, transition: "width 0.4s ease" }} />
+          </div>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: "#9CA3AF", textAlign: "right" }}>{screen.n} / {TOTAL_Q}</p>
+        </div>
+      )}
+
+      {/* CARD */}
+      <div style={{ width: "100%", maxWidth: 480, padding: "0 16px", marginTop: progress !== null ? 8 : 24 }}>
+
+        {/* ──────── GENDER ──────── */}
+        {screen.type === "gender" && (
+          <div style={{ textAlign: "center", paddingTop: 20 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: GREEN, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 12px" }}>3-minute quiz</p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111827", margin: "0 0 10px", lineHeight: 1.25 }}>A personalized<br />well-being plan</h1>
+            <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 36px", lineHeight: 1.6 }}>Improve your well-being with our<br />personalized plan</p>
+            <div style={{ display: "flex", gap: 12 }}>
+              {["Male","Female"].map(g => (
+                <button key={g} onClick={() => { setGender(g); next(); }} style={{ flex: 1, padding: "18px 0", fontSize: 16, fontWeight: 700, color: gender === g ? "#fff" : "#111827", background: gender === g ? GREEN : "#fff", border: `2px solid ${gender === g ? GREEN : "#E5E7EB"}`, borderRadius: 14, cursor: "pointer", transition: "all 0.2s" }}>
+                  {g === "Male" ? "👨 Male" : "👩 Female"}
+                </button>
+              ))}
+            </div>
+            <p style={{ fontSize: 11, color: "#9CA3AF", marginTop: 16, lineHeight: 1.5 }}>By continuing you agree to our Terms of Use and Privacy Policy</p>
           </div>
         )}
 
-        {/* BODY */}
-        <div style={styles.body}>
-          {/* WELCOME */}
-          {step === "welcome" && (
-            <div>
-              <span style={styles.welcomeEmoji}>🦄</span>
-              <h1 style={styles.welcomeTitle}>
-                Descubre tu perfil de bienestar
-              </h1>
-              <p style={styles.welcomeSubtitle}>
-                Responde {questions.length} preguntas rápidas y descubre qué
-                tipo de unicornio eres en tu camino hacia el bienestar.
-              </p>
-              <ul style={styles.featureList}>
-                <li style={styles.featureItem}>
-                  <span style={styles.featureItemEmoji}>⏱️</span>
-                  <span style={styles.featureItemText}>
-                    Solo 2 minutos para completarlo
-                  </span>
-                </li>
-                <li style={styles.featureItem}>
-                  <span style={styles.featureItemEmoji}>🎯</span>
-                  <span style={styles.featureItemText}>
-                    Resultados personalizados según tu estilo de vida
-                  </span>
-                </li>
-                <li style={styles.featureItem}>
-                  <span style={styles.featureItemEmoji}>💡</span>
-                  <span style={styles.featureItemText}>
-                    Consejos prácticos para mejorar tu bienestar
-                  </span>
-                </li>
-              </ul>
-              <button
-                style={styles.btn}
-                onClick={handleStart}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow =
-                    "0 8px 28px rgba(124,58,237,0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow =
-                    "0 4px 20px rgba(124,58,237,0.4)";
-                }}
-              >
-                Comenzar Quiz 🚀
-              </button>
+        {/* ──────── AGE ──────── */}
+        {screen.type === "age" && (
+          <div style={{ paddingTop: 8 }}>
+            <h2 style={qStyle}>{screen.question}</h2>
+            <p style={subStyle}>{screen.sub}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
+              {screen.options.map(opt => (
+                <OptionRow key={opt} label={opt} selected={answers.age === opt} onSelect={() => answer("age", opt)} />
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* QUIZ */}
-          {step === "quiz" && (
-            <div>
-              <p style={styles.questionTitle}>
-                {questions[currentQuestion].question}
-              </p>
-              <div style={styles.optionsGrid}>
-                {questions[currentQuestion].options.map((opt) => {
-                  const isSelected = selectedOption === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      style={{
-                        ...styles.option(isSelected),
-                        border: "none",
-                        textAlign: "left",
-                      }}
-                      onClick={() => handleOptionSelect(opt.id)}
-                      onMouseEnter={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.borderColor = "#a78bfa";
-                          e.currentTarget.style.background =
-                            "linear-gradient(135deg, #fdf4ff 0%, #faf5ff 100%)";
-                          e.currentTarget.style.transform = "scale(1.01)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.borderColor = "#e5e7eb";
-                          e.currentTarget.style.background = "#fafafa";
-                          e.currentTarget.style.transform = "scale(1)";
-                        }
-                      }}
-                    >
-                      <span style={styles.optionEmoji}>{opt.emoji}</span>
-                      <span style={styles.optionText(isSelected)}>
-                        {opt.text}
-                      </span>
-                      {isSelected && (
-                        <span style={styles.optionCheck}>
-                          <svg
-                            width="12"
-                            height="10"
-                            viewBox="0 0 12 10"
-                            fill="none"
-                          >
-                            <path
-                              d="M1 5L4.5 8.5L11 1"
-                              stroke="white"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+        {/* ──────── INFO / INTERSTITIAL ──────── */}
+        {screen.type === "info" && (
+          <div style={{ paddingTop: 16, textAlign: "center" }}>
+            {screen.icon && <div style={{ fontSize: 56, marginBottom: 16 }}>{screen.icon}</div>}
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: "0 0 16px", lineHeight: 1.3 }}>{screen.title}</h2>
+            <p style={{ fontSize: 15, color: "#4B5563", lineHeight: 1.7, margin: "0 0 32px", whiteSpace: "pre-line" }}>{screen.body}</p>
+            <GreenBtn onClick={next}>{screen.btn}</GreenBtn>
+          </div>
+        )}
+
+        {/* ──────── TRUST / QUOTES ──────── */}
+        {screen.type === "trust" && (
+          <div style={{ paddingTop: 16 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: "0 0 20px", textAlign: "center" }}>Reviewed by experts</h2>
+            {screen.quotes.map((q, i) => (
+              <div key={i} style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: "18px 20px", marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>{"⭐⭐⭐⭐⭐"}</div>
+                <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.6, margin: "0 0 8px" }}>"{q.text}"</p>
+                <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>{q.author}</p>
               </div>
+            ))}
+            <div style={{ marginTop: 20 }}><GreenBtn onClick={next}>{screen.btn}</GreenBtn></div>
+          </div>
+        )}
+
+        {/* ──────── SINGLE ──────── */}
+        {screen.type === "single" && (
+          <div style={{ paddingTop: 8 }}>
+            <h2 style={qStyle}>{screen.q}</h2>
+            {screen.sub && <p style={subStyle}>{screen.sub}</p>}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
+              {screen.opts.map(opt => (
+                <OptionRow key={opt} label={opt} selected={answers[screen.id] === opt} onSelect={() => answer(screen.id, opt)} />
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* RESULT */}
-          {step === "result" && result && (
-            <div>
-              <div style={styles.resultBadge(result.gradient)}>
-                <span style={styles.resultEmoji}>🦄</span>
-                <h2 style={styles.resultTitle}>{result.title}</h2>
-                <p style={styles.resultSubtitle}>{result.subtitle}</p>
-              </div>
+        {/* ──────── ICON SCALE ──────── */}
+        {screen.type === "scale" && (
+          <div style={{ paddingTop: 8 }}>
+            <h2 style={{ ...qStyle, textAlign: "center" }}>{screen.q}</h2>
+            {screen.sub && <p style={{ ...subStyle, textAlign: "center" }}>{screen.sub}</p>}
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 28 }}>
+              {EMOTION_IMGS.map((em, i) => {
+                const sel = answers[screen.id] === i;
+                return (
+                  <button key={i} onClick={() => answer(screen.id, i)} style={{ flex: 1, background: sel ? GREEN_LIGHT : "#fff", border: `2px solid ${sel ? GREEN : "#E5E7EB"}`, borderRadius: 12, padding: "10px 4px 8px", cursor: "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <img src={em.url} alt={em.label} style={{ width: "100%", maxWidth: 52, borderRadius: 8, aspectRatio: "1/1", objectFit: "cover" }} />
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+              <span style={{ fontSize: 11, color: "#9CA3AF" }}>Strongly disagree</span>
+              <span style={{ fontSize: 11, color: "#9CA3AF" }}>Strongly agree</span>
+            </div>
+          </div>
+        )}
 
-              <p style={styles.resultDescription}>{result.description}</p>
-
-              <p style={styles.tipsTitle}>✨ Tus próximos pasos:</p>
-              <ul style={styles.tipsList}>
-                {result.tips.map((tip, i) => (
-                  <li key={i} style={styles.tipItem}>
-                    <span style={styles.tipDot} />
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* EMAIL CAPTURE */}
-              <div style={styles.emailSection}>
-                <p style={styles.emailTitle}>
-                  🎁 Recibe tu plan personalizado
-                </p>
-                <p style={styles.emailDesc}>
-                  Déjanos tu correo y te enviamos consejos exclusivos basados
-                  en tu perfil de unicornio.
-                </p>
-                {!emailSubmitted ? (
-                  <form onSubmit={handleEmailSubmit}>
-                    <div style={styles.emailForm}>
-                      <input
-                        type="email"
-                        placeholder="tu@correo.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={styles.emailInput}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#7c3aed";
-                          e.target.style.boxShadow =
-                            "0 0 0 3px rgba(124,58,237,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#d8b4fe";
-                          e.target.style.boxShadow = "none";
-                        }}
-                        aria-label="Correo electrónico"
-                      />
-                      <button
-                        type="submit"
-                        style={styles.emailBtn}
-                        onMouseEnter={(e) => {
-                          e.target.style.opacity = "0.9";
-                          e.target.style.transform = "translateY(-1px)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.opacity = "1";
-                          e.target.style.transform = "translateY(0)";
-                        }}
-                      >
-                        Enviar ✨
-                      </button>
+        {/* ──────── MULTI-SELECT ──────── */}
+        {screen.type === "multi" && (
+          <div style={{ paddingTop: 8 }}>
+            <h2 style={qStyle}>{screen.q}</h2>
+            <p style={subStyle}>Select all that apply</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+              {screen.opts.map(opt => {
+                const sel = (answers[screen.id] || []).includes(opt);
+                return (
+                  <button key={opt} onClick={() => toggleMulti(screen.id, opt)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: sel ? GREEN_LIGHT : "#fff", border: `2px solid ${sel ? GREEN : "#E5E7EB"}`, borderRadius: 12, cursor: "pointer", textAlign: "left", transition: "all 0.2s" }}>
+                    <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${sel ? GREEN : "#D1D5DB"}`, background: sel ? GREEN : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                      {sel && <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                     </div>
-                    {emailError && (
-                      <p style={styles.emailError}>{emailError}</p>
-                    )}
-                  </form>
-                ) : (
-                  <div style={styles.successMsg}>
-                    <span style={{ fontSize: "20px" }}>✅</span>
-                    <span>
-                      ¡Gracias! Revisa tu bandeja de entrada pronto.
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <button
-                style={styles.restartBtn}
-                onClick={handleRestart}
-                onMouseEnter={(e) => {
-                  e.target.style.background = "#7c3aed";
-                  e.target.style.color = "#ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = "transparent";
-                  e.target.style.color = "#7c3aed";
-                }}
-              >
-                🔄 Repetir el Quiz
-              </button>
+                    <span style={{ fontSize: 15, color: sel ? "#065F46" : "#374151", fontWeight: sel ? 600 : 400 }}>{opt}</span>
+                  </button>
+                );
+              })}
             </div>
-          )}
-        </div>
-      </div>
+            <div style={{ marginTop: 20 }}>
+              <GreenBtn onClick={next} disabled={(answers[screen.id] || []).length === 0}>Continue</GreenBtn>
+            </div>
+          </div>
+        )}
 
-      <p style={styles.footer}>
-        © {new Date().getFullYear()} {BRAND}. Todos los derechos reservados.
-      </p>
+        {/* ──────── EMAIL ──────── */}
+        {screen.type === "email" && (
+          <div style={{ paddingTop: 24, textAlign: "center" }}>
+            <div style={{ fontSize: 52, marginBottom: 16 }}>📬</div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: "0 0 10px" }}>Enter your email</h2>
+            <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 28px", lineHeight: 1.6 }}>We'll send your personalized well-being plan and keep you updated on your progress.</p>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setEmailErr(""); }}
+              style={{ width: "100%", boxSizing: "border-box", padding: "14px 16px", fontSize: 16, border: `2px solid ${emailErr ? "#EF4444" : "#E5E7EB"}`, borderRadius: 12, outline: "none", marginBottom: 8, fontFamily: "inherit" }}
+            />
+            {emailErr && <p style={{ color: "#EF4444", fontSize: 13, margin: "0 0 12px" }}>{emailErr}</p>}
+            <GreenBtn onClick={() => {
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailErr("Please enter a valid email"); return; }
+              next();
+            }}>Get my plan →</GreenBtn>
+            <p style={{ fontSize: 11, color: "#9CA3AF", marginTop: 12 }}>No spam. Unsubscribe at any time.</p>
+          </div>
+        )}
+
+        {/* ──────── LOADING ──────── */}
+        {screen.type === "loading" && (
+          <div style={{ paddingTop: 60, textAlign: "center" }}>
+            <div style={{ fontSize: 52, marginBottom: 24 }}>🧬</div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: "0 0 10px" }}>We're building your plan</h2>
+            <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 32px" }}>Analyzing your answers to create a personalized well-being plan…</p>
+            <div style={{ background: "#E5E7EB", borderRadius: 8, height: 8, overflow: "hidden", marginBottom: 12 }}>
+              <div style={{ height: "100%", width: `${loadPct}%`, background: GREEN, borderRadius: 8, transition: "width 0.1s linear" }} />
+            </div>
+            <p style={{ fontSize: 13, color: "#9CA3AF" }}>{loadPct}%</p>
+          </div>
+        )}
+
+        {/* ──────── RESULT ──────── */}
+        {screen.type === "result" && (
+          <div style={{ paddingTop: 16 }}>
+            <div style={{ background: `linear-gradient(135deg, ${GREEN} 0%, #00A0D4 100%)`, borderRadius: 20, padding: "28px 24px", textAlign: "center", marginBottom: 24 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🌿</div>
+              <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: "0 0 8px", textShadow: "0 1px 3px rgba(0,0,0,0.15)" }}>Your personalized plan is ready</h2>
+              <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, margin: 0 }}>A personalized well-being management plan</p>
+            </div>
+
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: GREEN, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 14px" }}>Your plan includes</p>
+              {[
+                "Daily guided well-being sessions",
+                "Personalized techniques based on your profile",
+                "Evidence-based behavioral strategies",
+                "Progress tracking & milestone reminders",
+              ].map((item, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: GREEN_LIGHT, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="11" height="9" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke={GREEN} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <span style={{ fontSize: 14, color: "#374151", lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN}`, borderRadius: 14, padding: "16px 18px", marginBottom: 20 }}>
+              <p style={{ fontSize: 14, color: "#065F46", lineHeight: 1.6, margin: 0 }}>
+                <strong>Based on your answers</strong>, your plan focuses on reducing stress, building emotional resilience, and improving daily habits — {answers.q26 || "at your own pace"}.
+              </p>
+            </div>
+
+            <GreenBtn onClick={() => window.scrollTo(0,0)}>Start my plan 🚀</GreenBtn>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 16 }}>© {new Date().getFullYear()} Liven. All rights reserved.</p>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }
+
+function OptionRow({ label, selected, onSelect }) {
+  return (
+    <button onClick={onSelect} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px", background: selected ? GREEN_LIGHT : "#fff", border: `2px solid ${selected ? GREEN : "#E5E7EB"}`, borderRadius: 12, cursor: "pointer", textAlign: "left", transition: "all 0.2s", width: "100%" }}>
+      <span style={{ fontSize: 15, color: selected ? "#065F46" : "#374151", fontWeight: selected ? 600 : 400 }}>{label}</span>
+      <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selected ? GREEN : "#D1D5DB"}`, background: selected ? GREEN : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+        {selected && <svg width="11" height="9" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+      </div>
+    </button>
+  );
+}
+
+function GreenBtn({ onClick, disabled, children }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{ width: "100%", padding: "16px", fontSize: 16, fontWeight: 700, color: "#fff", background: disabled ? "#A7F3D0" : GREEN, border: "none", borderRadius: 14, cursor: disabled ? "not-allowed" : "pointer", transition: "background 0.2s", boxShadow: disabled ? "none" : "0 4px 14px rgba(0,195,137,0.35)" }}>
+      {children}
+    </button>
+  );
+}
+
+const qStyle = { fontSize: 20, fontWeight: 700, color: "#111827", margin: "0 0 6px", lineHeight: 1.35 };
+const subStyle = { fontSize: 14, color: "#6B7280", margin: "0 0 4px", lineHeight: 1.5 };
