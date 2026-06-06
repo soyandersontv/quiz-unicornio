@@ -394,9 +394,11 @@ export default function App() {
           const lvlColor = { Normal:G, Medium:"#F59E0B", High:"#EF4444" }[r.level] ?? "#F59E0B";
           return (
             <div>
-              {/* Logo */}
-              <div style={{ textAlign:"center", padding:"18px 0 4px" }}>
+              {/* Header result */}
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 0 4px" }}>
+                <button onClick={back} style={{ background:"none",border:"none",cursor:"pointer",padding:0,fontSize:22,color:"#374151",lineHeight:1 }}>←</button>
                 <span style={{ ...LOGO, fontSize:26 }}>Quiz Unicornio</span>
+                <div style={{ width:32 }} />
               </div>
 
               {/* Profile card */}
@@ -455,7 +457,7 @@ export default function App() {
                 ))}
               </div>
 
-              <Btn onClick={() => {}}>Get my personalized plan →</Btn>
+              <Btn onClick={() => { setIdx(0); setAnswers({}); setEmail(""); }}>Get my personalized plan →</Btn>
               <p style={{ textAlign:"center", fontSize:12, color:"#9CA3AF", marginTop:14 }}>
                 © {new Date().getFullYear()} Quiz Unicornio. All rights reserved.
               </p>
